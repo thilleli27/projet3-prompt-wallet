@@ -1,0 +1,430 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: #F5F5F5;
+    color: #333333;
+    line-height: 1.6;
+}
+
+/* Navigation */
+nav {
+    background-color: #FFFFFF;
+    border-bottom: 2px solid #B288C0;
+    padding: 1.5rem 2rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.nav-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #9A48D0;
+}
+
+.nav-menu {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+}
+
+.nav-item {
+    position: relative;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: #333333;
+    font-weight: 600;
+    transition: color 0.3s;
+    cursor: pointer;
+}
+
+.nav-link:hover {
+    color: #9A48D0;
+}
+
+.dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: #FFFFFF;
+    border: 1px solid #B288C0;
+    border-radius: 8px;
+    padding: 0.5rem 0;
+    min-width: 150px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    z-index: 100;
+}
+
+.nav-item:hover .dropdown {
+    display: block;
+}
+
+.dropdown a {
+    display: block;
+    padding: 0.5rem 1rem;
+    color: #333333;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.dropdown a:hover {
+    background-color: #B288C0;
+    color: #FFFFFF;
+}
+
+/* Container principal */
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* Header Dashboard */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.dashboard-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #9A48D0;
+}
+
+.btn-new {
+    background: linear-gradient(135deg, #9A48D0, #B288C0);
+    color: #FFFFFF;
+    border: none;
+    padding: 1rem 2.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+    font-family: 'Montserrat', sans-serif;
+    box-shadow: 0 4px 12px rgba(154, 72, 208, 0.3);
+}
+
+.btn-new:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(154, 72, 208, 0.4);
+}
+
+/* Barre de recherche/filtre */
+.filter-bar {
+    margin-bottom: 2rem;
+}
+
+.filter-input {
+    width: 100%;
+    max-width: 500px;
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    border: 2px solid #B288C0;
+    border-radius: 12px;
+    font-family: 'Montserrat', sans-serif;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.filter-input:focus {
+    outline: none;
+    border-color: #9A48D0;
+    box-shadow: 0 0 0 3px rgba(154, 72, 208, 0.1);
+}
+
+.filter-input::placeholder {
+    color: #999;
+}
+
+/* Grid des cards */
+.prompts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Card Prompt */
+.prompt-card {
+    background-color: #FFFFFF;
+    border: 2px solid #B288C0;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transition: transform 0.3s, box-shadow 0.3s;
+    cursor: pointer;
+}
+
+.prompt-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(154, 72, 208, 0.2);
+}
+
+.prompt-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #9A48D0;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.prompt-title:hover {
+    color: #7BC950;
+}
+
+.prompt-preview {
+  color: #666;
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+
+  display: box;
+  box-orient: vertical;
+  line-clamp: 3;
+
+  overflow: hidden;
+}
+
+
+.prompt-meta {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.85rem;
+    color: #999;
+}
+
+.prompt-tag {
+    background-color: #B288C0;
+    color: #FFFFFF;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+}
+
+.card-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.btn-edit,
+.btn-delete {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.btn-edit {
+    background-color: #7BC950;
+    color: #FFFFFF;
+}
+
+.btn-edit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(123, 201, 80, 0.3);
+}
+
+.btn-delete {
+    background-color: #FFFFFF;
+    color: #9A48D0;
+    border: 2px solid #9A48D0;
+}
+
+.btn-delete:hover {
+    background-color: #9A48D0;
+    color: #FFFFFF;
+    transform: translateY(-2px);
+}
+
+/* Modal de confirmation */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background-color: #FFFFFF;
+    padding: 2rem;
+    border-radius: 16px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
+
+.modal-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #9A48D0;
+    margin-bottom: 1rem;
+}
+
+.modal-text {
+    color: #333333;
+    margin-bottom: 2rem;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.btn-confirm,
+.btn-cancel {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.btn-confirm {
+    background-color: #9A48D0;
+    color: #FFFFFF;
+}
+
+.btn-cancel {
+    background-color: #FFFFFF;
+    color: #333333;
+    border: 2px solid #333333;
+}
+
+/* Empty state */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #999;
+}
+
+.empty-state-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.empty-state-text {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .prompts-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-input {
+        max-width: 100%;
+    }
+}
+
+/* ===== Theme variables ===== */
+:root {
+  --color-bg: #F5F5F5;
+  --color-bg-secondary: #ffffff;
+  --color-text: #333333;
+  --color-text-secondary: #333333;
+  --color-border: #B288C0;
+  --color-accent-gradient: linear-gradient(135deg, #9A48D0, #B288C0);
+  --transition-fast: 0.3s ease;
+}
+
+/* ===== Dark mode ===== */
+body.dark {
+  --color-bg: #121212;
+  --color-bg-secondary: #1e1e1e;
+  --color-text: #f1f1f1;
+  --color-text-secondary: #f1f1f1;
+  --color-border: #2e2e2e;
+  --color-accent-gradient: linear-gradient(135deg, #7a3db8, #4b2c6f);
+}
+
+/* ===== Global ===== */
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition: background-color var(--transition-fast),
+              color var(--transition-fast);
+}
+
+/* ===== Navigation ===== */
+nav {
+  background-color: var(--color-bg-secondary);
+  border-bottom: 2px solid var(--color-border);
+  padding: 1.5rem 2rem;
+}
+
+.nav-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* ===== Theme Toggle ===== */
+.theme-toggle {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+  transition: all var(--transition-fast);
+  border: 1px solid var(--color-border);
+}
+
+.theme-toggle:hover {
+  background: var(--color-accent-gradient);
+  color: white;
+  transform: rotate(180deg);
+  border-color: transparent;
+}
+
