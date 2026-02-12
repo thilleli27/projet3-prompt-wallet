@@ -2,6 +2,7 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import localShortcut from 'electron-localshortcut'
 
 function createWindow() {
   // Create the browser window.
@@ -29,6 +30,25 @@ function createWindow() {
   // Ouvre DevTools pour débugger
   mainWindow.webContents.openDevTools()
 
+  // ========================================
+  // 🎹 RACCOURCIS CLAVIER
+  // ========================================
+
+  // Raccourci 1 : Ctrl+L - Afficher la liste des prompts (Dashboard)
+  localShortcut.register(mainWindow, 'CommandOrControl+L', () => {
+    mainWindow.webContents.send('navigate-to', '/')
+  })
+
+  // Raccourci 2 : Ctrl+N - Créer un nouveau prompt
+  localShortcut.register(mainWindow, 'CommandOrControl+N', () => {
+    mainWindow.webContents.send('navigate-to', '/new')
+  })
+
+  // Raccourci optionnel : Ctrl+/ - Afficher l'aide des raccourcis
+  localShortcut.register(mainWindow, 'CommandOrControl+/', () => {
+    mainWindow.webContents.send('show-shortcuts-help')
+  })
+
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
@@ -36,6 +56,8 @@ function createWindow() {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
+  return mainWindow
 }
 
 // This method will be called when Electron has finished

@@ -34,7 +34,18 @@ export default function NewPrompt() {
       setContentLength(162);
       detectVariables(sampleContent);
     }
-  }, [location.search]);
+
+    // 🎯 NOUVEAUTÉ : Récupérer les données du drag & drop
+    if (location.state?.title) {
+      setTitle(location.state.title);
+      setTitleLength(location.state.title.length);
+    }
+    if (location.state?.content) {
+      setContent(location.state.content);
+      setContentLength(location.state.content.length);
+      detectVariables(location.state.content);
+    }
+  }, [location.search, location.state]);
 
   function detectVariables(text) {
     const regex = /\{\{([^}]+)\}\}/g;
@@ -51,7 +62,7 @@ export default function NewPrompt() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     try {
       const prompt = {
         id: Date.now(),
@@ -60,10 +71,10 @@ export default function NewPrompt() {
         content,
         description,
         tags: tags.filter((t) => t.trim() !== ""),
-        date: new Date().toLocaleDateString('en-US', { 
-          day: 'numeric', 
-          month: 'short', 
-          year: 'numeric' 
+        date: new Date().toLocaleDateString('en-US', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric'
         }),
         preview: description || content.substring(0, 80) + "...",
         tag: category || "Other",
@@ -72,16 +83,16 @@ export default function NewPrompt() {
       // Get existing prompts
       const saved = localStorage.getItem('prompts');
       const existingPrompts = saved ? JSON.parse(saved) : [];
-      
+
       // Check that it's an array
       const promptsArray = Array.isArray(existingPrompts) ? existingPrompts : [];
-      
+
       // Add the new prompt at the beginning
       const updatedPrompts = [prompt, ...promptsArray];
-      
+
       // Save to localStorage
       localStorage.setItem('prompts', JSON.stringify(updatedPrompts));
-      
+
       console.log("Prompt saved:", prompt);
       navigate("/");
     } catch (error) {
