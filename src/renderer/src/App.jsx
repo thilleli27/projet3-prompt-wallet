@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HashRouter, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import NewPrompt from "./pages/NewPrompt";
 import EditPrompt from "./pages/EditPrompt";
@@ -9,7 +9,7 @@ import Navbar from "./components/Navbar";
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Navbar />
 
       <Routes>
@@ -20,6 +20,6 @@ export default function App() {
         <Route path="/about" element={<About />} />
         <Route path="/cgu" element={<Cgu />} />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
