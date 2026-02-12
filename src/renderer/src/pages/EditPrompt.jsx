@@ -19,12 +19,11 @@ export default function EditPrompt() {
 
   const [promptNotFound, setPromptNotFound] = useState(false);
 
-  // Load the prompt to edit
+  // Charger depuis le fichier
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem('prompts');
-      if (saved) {
-        const prompts = JSON.parse(saved);
+    async function loadPrompt() {
+      try {
+        const prompts = await window.api.prompts.load();
         const promptToEdit = prompts.find((p) => p.id === parseInt(id));
 
         if (promptToEdit) {
@@ -44,13 +43,13 @@ export default function EditPrompt() {
         } else {
           setPromptNotFound(true);
         }
-      } else {
+      } catch (error) {
+        console.error("Error loading prompt:", error);
         setPromptNotFound(true);
       }
-    } catch (error) {
-      console.error("Error loading prompt:", error);
-      setPromptNotFound(true);
     }
+
+    loadPrompt();
   }, [id]);
 
   function detectVariables(text) {
@@ -66,18 +65,18 @@ export default function EditPrompt() {
   const updateTag = (index, value) =>
     setTags(tags.map((t, i) => (i === index ? value : t)));
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
 
     try {
-      const saved = localStorage.getItem('prompts');
-      const prompts = saved ? JSON.parse(saved) : [];
+      //Charger depuis le fichier
+      const prompts = await window.api.prompts.load();
 
-      // Find the index of the prompt to update
+      // Trouver l'index du prompt à modifier
       const promptIndex = prompts.findIndex((p) => p.id === parseInt(id));
 
       if (promptIndex !== -1) {
-        // Update the prompt
+        // Mettre à jour le prompt
         const updatedPrompt = {
           ...prompts[promptIndex],
           title,
@@ -87,17 +86,21 @@ export default function EditPrompt() {
           tags: tags.filter((t) => t.trim() !== ""),
           preview: description || content.substring(0, 80) + "...",
           tag: category || "Other",
-          // Keep the original date
+          // Garder la date originale
           date: prompts[promptIndex].date,
         };
 
         prompts[promptIndex] = updatedPrompt;
 
-        // Save to localStorage
-        localStorage.setItem('prompts', JSON.stringify(prompts));
+        // Sauvegarder dans le fichier
+        const result = await window.api.prompts.save(prompts);
 
-        console.log("Prompt updated:", updatedPrompt);
-        navigate("/");
+        if (result.success) {
+          console.log("Prompt updated:", updatedPrompt);
+          navigate("/");
+        } else {
+          throw new Error(result.error || 'Save failed');
+        }
       } else {
         alert("❌ Prompt not found");
       }

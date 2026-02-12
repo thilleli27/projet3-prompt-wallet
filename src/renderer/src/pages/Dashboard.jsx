@@ -8,19 +8,45 @@ import { prompts as initialPrompts } from "../data/prompts";
 export default function Dashboard() {
   const navigate = useNavigate();
   
-  // Load prompts from localStorage or use initial prompts
-  const [prompts, setPrompts] = useState(() => {
-    const saved = localStorage.getItem('prompts');
-    return saved ? JSON.parse(saved) : initialPrompts;
-  });
+  // Charger depuis le fichier au lieu de localStorage
+  const [prompts, setPrompts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   
   const [search, setSearch] = useState("");
   const [deleteId, setDeleteId] = useState(null);
 
-  // Save to localStorage when prompts change
+  // Charger les prompts au démarrage
   useEffect(() => {
-    localStorage.setItem('prompts', JSON.stringify(prompts));
-  }, [prompts]);
+    async function loadPrompts() {
+      try {
+        const savedPrompts = await window.api.prompts.load();
+        
+        // Si aucun prompt sauvegardé, utiliser les prompts initiaux
+        if (savedPrompts.length === 0) {
+          setPrompts(initialPrompts);
+          // Sauvegarder les prompts initiaux dans le fichier
+          await window.api.prompts.save(initialPrompts);
+        } else {
+          setPrompts(savedPrompts);
+        }
+      } catch (error) {
+        console.error('Error loading prompts:', error);
+        // En cas d'erreur, utiliser les prompts initiaux
+        setPrompts(initialPrompts);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadPrompts();
+  }, []);
+
+  // Sauvegarder dans le fichier au lieu de localStorage
+  useEffect(() => {
+    if (!isLoading && prompts.length > 0) {
+      window.api.prompts.save(prompts);
+    }
+  }, [prompts, isLoading]);
 
   const filteredPrompts = useMemo(
     () => prompts.filter((p) => p.title.toLowerCase().includes(search.toLowerCase())),
@@ -32,6 +58,15 @@ export default function Dashboard() {
     setPrompts((prev) => prev.filter((p) => p.id !== deleteId));
     setDeleteId(null);
   };
+
+  // Afficher un loader pendant le chargement
+  if (isLoading) {
+    return (
+      <div className="container" style={{ textAlign: 'center', paddingTop: '3rem' }}>
+        <p style={{ color: '#9A48D0', fontSize: '1.2rem' }}>Loading prompts...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container">

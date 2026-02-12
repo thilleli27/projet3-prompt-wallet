@@ -35,7 +35,7 @@ export default function NewPrompt() {
       detectVariables(sampleContent);
     }
 
-    // 🎯 NOUVEAUTÉ : Récupérer les données du drag & drop
+    // Récupérer les données du drag & drop
     if (location.state?.title) {
       setTitle(location.state.title);
       setTitleLength(location.state.title.length);
@@ -60,7 +60,7 @@ export default function NewPrompt() {
   const updateTag = (index, value) =>
     setTags(tags.map((t, i) => (i === index ? value : t)));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
@@ -80,21 +80,22 @@ export default function NewPrompt() {
         tag: category || "Other",
       };
 
-      // Get existing prompts
-      const saved = localStorage.getItem('prompts');
-      const existingPrompts = saved ? JSON.parse(saved) : [];
-
-      // Check that it's an array
+      //Charger depuis le fichier
+      const existingPrompts = await window.api.prompts.load();
       const promptsArray = Array.isArray(existingPrompts) ? existingPrompts : [];
 
-      // Add the new prompt at the beginning
+      // Ajouter le nouveau prompt au début
       const updatedPrompts = [prompt, ...promptsArray];
 
-      // Save to localStorage
-      localStorage.setItem('prompts', JSON.stringify(updatedPrompts));
+      // Sauvegarder dans le fichier
+      const result = await window.api.prompts.save(updatedPrompts);
 
-      console.log("Prompt saved:", prompt);
-      navigate("/");
+      if (result.success) {
+        console.log("Prompt saved:", prompt);
+        navigate("/");
+      } else {
+        throw new Error(result.error || 'Save failed');
+      }
     } catch (error) {
       console.error("Error saving:", error);
       alert("❌ Error saving prompt");

@@ -11,12 +11,11 @@ export default function UsePrompt() {
   const [finalPrompt, setFinalPrompt] = useState("");
   const [promptNotFound, setPromptNotFound] = useState(false);
 
-  // Load prompt from localStorage
+  // Charger depuis le fichier
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem('prompts');
-      if (saved) {
-        const prompts = JSON.parse(saved);
+    async function loadPrompt() {
+      try {
+        const prompts = await window.api.prompts.load();
         const foundPrompt = prompts.find((p) => p.id === parseInt(id));
 
         if (foundPrompt) {
@@ -37,13 +36,13 @@ export default function UsePrompt() {
         } else {
           setPromptNotFound(true);
         }
-      } else {
+      } catch (error) {
+        console.error("Error loading prompt:", error);
         setPromptNotFound(true);
       }
-    } catch (error) {
-      console.error("Error loading prompt:", error);
-      setPromptNotFound(true);
     }
+
+    loadPrompt();
   }, [id]);
 
   // Update final prompt when variables change

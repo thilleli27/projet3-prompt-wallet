@@ -3,6 +3,54 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import localShortcut from 'electron-localshortcut'
+import { promises as fs } from 'fs' 
+
+//  Chemin du fichier de stockage
+const getPromptsPath = () => {
+  const userDataPath = app.getPath('userData')
+  return join(userDataPath, 'prompts.json')
+}
+
+//  Handlers IPC pour les prompts
+ipcMain.handle('prompts:load', async () => {
+  try {
+    const filePath = getPromptsPath()
+    const data = await fs.readFile(filePath, 'utf8')
+    return JSON.parse(data)
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      // Fichier n'existe pas encore, retourner un tableau vide
+      return []
+    }
+    console.error('Error loading prompts:', error)
+    throw error
+  }
+})
+
+ipcMain.handle('prompts:save', async (event, prompts) => {
+  try {
+    const filePath = getPromptsPath()
+    await fs.writeFile(filePath, JSON.stringify(prompts, null, 2), 'utf8')
+    return { success: true }
+  } catch (error) {
+    console.error('Error saving prompts:', error)
+    return { success: false, error: error.message }
+  }
+})
+
+ipcMain.handle('prompts:delete', async (event, id) => {
+  try {
+    const filePath = getPromptsPath()
+    const data = await fs.readFile(filePath, 'utf8')
+    const prompts = JSON.parse(data)
+    const updated = prompts.filter(p => p.id !== id)
+    await fs.writeFile(filePath, JSON.stringify(updated, null, 2), 'utf8')
+    return { success: true }
+  } catch (error) {
+    console.error('Error deleting prompt:', error)
+    return { success: false, error: error.message }
+  }
+})
 
 function createWindow() {
   // Create the browser window.
@@ -33,7 +81,6 @@ function createWindow() {
   // ========================================
   // 🎹 RACCOURCIS CLAVIER
   // ========================================
-
   // Raccourci 1 : Ctrl+L - Afficher la liste des prompts (Dashboard)
   localShortcut.register(mainWindow, 'CommandOrControl+L', () => {
     mainWindow.webContents.send('navigate-to', '/')

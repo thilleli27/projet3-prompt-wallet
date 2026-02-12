@@ -10,6 +10,13 @@ const api = {
   // Afficher l'aide des raccourcis
   onShowShortcutsHelp: (callback) => {
     ipcRenderer.on('show-shortcuts-help', () => callback())
+  },
+  
+  //  API pour gérer les prompts
+  prompts: {
+    load: () => ipcRenderer.invoke('prompts:load'),
+    save: (prompts) => ipcRenderer.invoke('prompts:save', prompts),
+    delete: (id) => ipcRenderer.invoke('prompts:delete', id)
   }
 }
 
