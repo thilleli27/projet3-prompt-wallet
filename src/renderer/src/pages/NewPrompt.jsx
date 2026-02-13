@@ -1,11 +1,38 @@
+/**
+ * NewPrompt Page
+ * Form for creating a new prompt or editing an existing one
+ * 
+ * Features:
+ * - Form fields: title, category, content, description, tags
+ * - Character counters for inputs
+ * - Automatic variable detection ({{variable}} syntax)
+ * - Dynamic tag management (add/remove tags)
+ * - Support for drag-drop pre-filled content
+ * - Form validation
+ * - Auto-save to file storage
+ * - Optional edit mode (can be extended for editing existing prompts)
+ * 
+ * Variables in Prompts:
+ * - Use {{variable_name}} syntax in content
+ * - Variables are automatically detected and highlighted
+ * - Users can substitute them when using the prompt
+ * 
+ * Data Flow:
+ * 1. User fills form
+ * 2. Variables are detected from {{...}} patterns
+ * 3. Submit creates prompt object with unique ID (timestamp)
+ * 4. And saves to file via IPC handler
+ * 5. Navigate back to dashboard
+ */
+
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 export default function NewPrompt() {
   const navigate = useNavigate();
-  const location = useLocation();
+  const location = useLocation(); // For receiving drag-drop data
 
-  // Form states
+  // Form field states
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [content, setContent] = useState("");
@@ -13,18 +40,22 @@ export default function NewPrompt() {
   const [tags, setTags] = useState([""]);
   const [variablesDetected, setVariablesDetected] = useState([]);
 
+  // Character counters for display
   const [titleLength, setTitleLength] = useState(0);
   const [contentLength, setContentLength] = useState(0);
   const [descLength, setDescLength] = useState(0);
 
+  // Edit mode flag (for future edit functionality)
   const [isEditMode, setIsEditMode] = useState(false);
 
+  // Initialize form with edit or drag-drop data
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const editId = params.get("edit");
 
     if (editId) {
       setIsEditMode(true);
+      // TODO: Load existing prompt data from storage
       setTitle("API documentation generator");
       setCategory("documentation");
       const sampleContent =
@@ -35,7 +66,7 @@ export default function NewPrompt() {
       detectVariables(sampleContent);
     }
 
-    // Récupérer les données du drag & drop
+    // Pre-fill form with drag-drop data
     if (location.state?.title) {
       setTitle(location.state.title);
       setTitleLength(location.state.title.length);
@@ -47,6 +78,7 @@ export default function NewPrompt() {
     }
   }, [location.search, location.state]);
 
+  // Detect variables in content
   function detectVariables(text) {
     const regex = /\{\{([^}]+)\}\}/g;
     const matches = [...text.matchAll(regex)];
@@ -54,12 +86,14 @@ export default function NewPrompt() {
     setVariablesDetected(variables);
   }
 
+  // Tag management
   const addTagField = () => setTags([...tags, ""]);
   const removeTagField = (index) =>
     setTags(tags.filter((_, i) => i !== index));
   const updateTag = (index, value) =>
     setTags(tags.map((t, i) => (i === index ? value : t)));
 
+  // Form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -80,14 +114,10 @@ export default function NewPrompt() {
         tag: category || "Other",
       };
 
-      //Charger depuis le fichier
       const existingPrompts = await window.api.prompts.load();
       const promptsArray = Array.isArray(existingPrompts) ? existingPrompts : [];
-
-      // Ajouter le nouveau prompt au début
       const updatedPrompts = [prompt, ...promptsArray];
 
-      // Sauvegarder dans le fichier
       const result = await window.api.prompts.save(updatedPrompts);
 
       if (result.success) {
@@ -102,9 +132,10 @@ export default function NewPrompt() {
     }
   };
 
+  // JSX du composant
   return (
     <div style={{ maxWidth: "900px", margin: "2rem auto", padding: "1rem" }}>
-      {/* Header */}
+      {/* Page Header */}
       <div style={{ marginBottom: "2rem" }}>
         <span
           style={{
@@ -127,7 +158,7 @@ export default function NewPrompt() {
         </p>
       </div>
 
-      {/* Form */}
+      {/* Main Form */}
       <form
         onSubmit={handleSubmit}
         style={{
@@ -140,7 +171,7 @@ export default function NewPrompt() {
           gap: "1.5rem",
         }}
       >
-        {/* Title */}
+        {/* Title Field */}
         <div>
           <label style={{ fontWeight: 600 }}>Prompt title *</label>
           <input
@@ -165,7 +196,7 @@ export default function NewPrompt() {
           </div>
         </div>
 
-        {/* Category */}
+        {/* Category Field */}
         <div>
           <label style={{ fontWeight: 600 }}>Category</label>
           <select
@@ -190,7 +221,7 @@ export default function NewPrompt() {
           </select>
         </div>
 
-        {/* Content */}
+        {/* Content Field */}
         <div>
           <label style={{ fontWeight: 600 }}>Prompt content *</label>
           <textarea
@@ -215,6 +246,7 @@ export default function NewPrompt() {
             {contentLength}/2000 characters
           </div>
 
+          {/* Variable Detection Feedback */}
           {variablesDetected.length > 0 && (
             <div
               style={{
@@ -245,7 +277,7 @@ export default function NewPrompt() {
           )}
         </div>
 
-        {/* Tags */}
+        {/* Tags Field */}
         <div>
           <label style={{ fontWeight: 600 }}>Tags</label>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginTop: "0.5rem" }}>
@@ -294,7 +326,7 @@ export default function NewPrompt() {
           </div>
         </div>
 
-        {/* Description */}
+        {/* Description Field */}
         <div>
           <label style={{ fontWeight: 600 }}>Description (optional)</label>
           <textarea
@@ -318,7 +350,7 @@ export default function NewPrompt() {
           </div>
         </div>
 
-        {/* Actions */}
+        {/* Form Actions */}
         <div style={{ display: "flex", gap: "1rem" }}>
           <button
             type="button"
@@ -331,6 +363,7 @@ export default function NewPrompt() {
               backgroundColor: "#fff",
               color: "#333",
               cursor: "pointer",
+              fontWeight: 600,
             }}
           >
             Cancel
@@ -345,6 +378,7 @@ export default function NewPrompt() {
               color: "#fff",
               border: "none",
               cursor: "pointer",
+              fontWeight: 600,
             }}
           >
             💾 Save prompt

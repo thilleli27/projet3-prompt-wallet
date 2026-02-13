@@ -1,3 +1,16 @@
+/**
+ * useKeyboardShortcuts Hook
+ * Handles global keyboard shortcuts for navigation
+ * 
+ * Keyboard shortcuts:
+ * - Ctrl+L: Navigate to prompts list (dashboard)
+ * - Ctrl+N: Navigate to new prompt page
+ * - Ctrl+/: Show help dialog with shortcut information
+ * 
+ * These shortcuts are defined in the Electron main process
+ * and communicated via IPC (Inter-Process Communication)
+ */
+
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
@@ -5,22 +18,22 @@ export function useKeyboardShortcuts() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    // Écouter les événements de navigation depuis Electron
+    // Listen for navigation events from Electron main process
     if (window.api && window.api.onNavigate) {
       window.api.onNavigate((path) => {
         navigate(path)
       })
     }
 
-    // Écouter l'aide des raccourcis
+    // Listen for help/shortcuts event from Electron main process
     if (window.api && window.api.onShowShortcutsHelp) {
       window.api.onShowShortcutsHelp(() => {
-        // Vous pouvez afficher un modal ou une notification
-        alert(`Raccourcis clavier :
+        // Display help dialog with available shortcuts
+        alert(`Available keyboard shortcuts:
 
-📋 Ctrl+L : Liste des prompts
-➕ Ctrl+N : Nouveau prompt
-❓ Ctrl+/ : Aide`)
+📋 Ctrl+L : List prompts
+➕ Ctrl+N : New prompt
+❓ Ctrl+/ : Help`)
       })
     }
   }, [navigate])

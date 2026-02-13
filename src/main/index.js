@@ -1,3 +1,12 @@
+/**
+ * Electron Main Process
+ * Handles:
+ * - Window creation and management
+ * - IPC communication between main and renderer processes
+ * - Keyboard shortcuts for navigation
+ * - File-based data persistence for prompts
+ */
+
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
@@ -5,13 +14,21 @@ import icon from '../../resources/icon.png?asset'
 import localShortcut from 'electron-localshortcut'
 import { promises as fs } from 'fs' 
 
-//  Chemin du fichier de stockage
+/**
+ * Get the file path for storing prompts
+ * Stores in user's app data directory so it persists across sessions
+ * Returns: {string} Full path to prompts.json
+ */
 const getPromptsPath = () => {
   const userDataPath = app.getPath('userData')
   return join(userDataPath, 'prompts.json')
 }
 
-//  Handlers IPC pour les prompts
+/**
+ * IPC Handler: Load prompts
+ * Reads prompts from JSON file in userData directory
+ * Returns empty array if file doesn't exist yet
+ */
 ipcMain.handle('prompts:load', async () => {
   try {
     const filePath = getPromptsPath()
@@ -19,7 +36,7 @@ ipcMain.handle('prompts:load', async () => {
     return JSON.parse(data)
   } catch (error) {
     if (error.code === 'ENOENT') {
-      // Fichier n'existe pas encore, retourner un tableau vide
+      // File doesn't exist yet, return empty array
       return []
     }
     console.error('Error loading prompts:', error)
@@ -27,6 +44,11 @@ ipcMain.handle('prompts:load', async () => {
   }
 })
 
+/**
+ * IPC Handler: Save prompts
+ * Writes prompts array to JSON file with pretty formatting
+ * Overwrites previous contents
+ */
 ipcMain.handle('prompts:save', async (event, prompts) => {
   try {
     const filePath = getPromptsPath()
@@ -38,6 +60,10 @@ ipcMain.handle('prompts:save', async (event, prompts) => {
   }
 })
 
+/**
+ * IPC Handler: Delete prompt by ID
+ * Removes a prompt from the file and saves the updated list
+ */
 ipcMain.handle('prompts:delete', async (event, id) => {
   try {
     const filePath = getPromptsPath()
@@ -52,8 +78,12 @@ ipcMain.handle('prompts:delete', async (event, id) => {
   }
 })
 
+/**
+ * Create the main application window
+ * Configures window properties, keyboard shortcuts, and IPC listeners
+ */
 function createWindow() {
-  // Create the browser window.
+  // Create the browser window
   const mainWindow = new BrowserWindow({
     width: 900,
     height: 670,
@@ -66,32 +96,34 @@ function createWindow() {
     }
   })
 
+  // Show window when ready
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
   })
 
+  // Handle external links in a new browser window
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
     return { action: 'deny' }
   })
 
-  // Ouvre DevTools pour débugger
+  // Open DevTools for debugging
   mainWindow.webContents.openDevTools()
 
   // ========================================
-  // 🎹 RACCOURCIS CLAVIER
+  // 🎹 KEYBOARD SHORTCUTS
   // ========================================
-  // Raccourci 1 : Ctrl+L - Afficher la liste des prompts (Dashboard)
+  // Shortcut 1: Ctrl+L - Navigate to Dashboard (List prompts)
   localShortcut.register(mainWindow, 'CommandOrControl+L', () => {
     mainWindow.webContents.send('navigate-to', '/')
   })
 
-  // Raccourci 2 : Ctrl+N - Créer un nouveau prompt
+  // Shortcut 2: Ctrl+N - Navigate to New Prompt page
   localShortcut.register(mainWindow, 'CommandOrControl+N', () => {
     mainWindow.webContents.send('navigate-to', '/new')
   })
 
-  // Raccourci optionnel : Ctrl+/ - Afficher l'aide des raccourcis
+  // Shortcut 3: Ctrl+/ - Show keyboard shortcuts help
   localShortcut.register(mainWindow, 'CommandOrControl+/', () => {
     mainWindow.webContents.send('show-shortcuts-help')
   })
@@ -107,16 +139,16 @@ function createWindow() {
   return mainWindow
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
+/**
+ * App ready event
+ * Called when Electron has finished initialization
+ */
 app.whenReady().then(() => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
-  // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
@@ -124,23 +156,21 @@ app.whenReady().then(() => {
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
 
+  // Create the main window
   createWindow()
 
+  // Re-create window when dock icon is clicked (macOS)
   app.on('activate', function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
 })
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
+/**
+ * Quit when all windows are closed
+ * Exception: On macOS, stay active until Cmd+Q is pressed
+ */
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
   }
 })
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.

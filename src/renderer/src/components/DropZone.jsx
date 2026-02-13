@@ -1,22 +1,51 @@
+/**
+ * DropZone Component
+ * Enables drag-and-drop functionality for text files
+ * Wraps the entire application to catch dropped files
+ * 
+ * Supported file types: .txt, .md, text/plain
+ * When a file is dropped, it navigates to /new page with pre-filled content
+ * 
+ * Features:
+ * - Visual feedback when dragging files over the zone
+ * - Automatic file type validation
+ * - Pre-fills the new prompt form with file content and name
+ * - Works globally across the entire app
+ */
+
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 export default function DropZone({ children }) {
+  // Track if user is dragging over the drop zone
   const [isDragging, setIsDragging] = useState(false)
   const navigate = useNavigate()
 
+  /**
+   * Handle drag over event
+   * Prevents default browser behavior and shows visual feedback
+   */
   const handleDragOver = (e) => {
     e.preventDefault()
     e.stopPropagation()
     setIsDragging(true)
   }
 
+  /**
+   * Handle drag leave event
+   * Hide visual feedback when user leaves the drop zone
+   */
   const handleDragLeave = (e) => {
     e.preventDefault()
     e.stopPropagation()
     setIsDragging(false)
   }
 
+  /**
+   * Handle file drop event
+   * Validates file type and navigates to new prompt page with content
+   * Only accepts text files (.txt, .md, and text/plain MIME type)
+   */
   const handleDrop = async (e) => {
     e.preventDefault()
     e.stopPropagation()
@@ -24,7 +53,7 @@ export default function DropZone({ children }) {
 
     const files = Array.from(e.dataTransfer.files)
 
-    // Filtrer uniquement les fichiers texte
+    // Filter only text files
     const textFiles = files.filter(file =>
       file.type === 'text/plain' ||
       file.name.endsWith('.txt') ||
@@ -32,18 +61,20 @@ export default function DropZone({ children }) {
     )
 
     if (textFiles.length === 0) {
-      alert('Veuillez glisser un fichier texte (.txt ou .md)')
+      alert('Please drop a text file (.txt or .md)')
       return
     }
 
-    // Lire le premier fichier texte
+    // Read the first text file
     const file = textFiles[0]
     const text = await file.text()
 
-    // Naviguer vers la page de création avec le contenu
+    // Navigate to new prompt page with pre-filled content
     navigate('/new', {
       state: {
+        // Extract filename without extension as title
         title: file.name.replace(/\.(txt|md)$/, ''),
+        // File content becomes the prompt content
         content: text
       }
     })
@@ -60,6 +91,7 @@ export default function DropZone({ children }) {
         height: '100%'
       }}
     >
+      {/* Visual feedback overlay when dragging files */}
       {isDragging && (
         <div
           style={{
@@ -79,9 +111,10 @@ export default function DropZone({ children }) {
             color: '#3b82f6'
           }}
         >
-          📄 Déposez le fichier texte pour créer un prompt
+          📄 Drop text file to create a prompt
         </div>
       )}
+      {/* Render child components (entire app content) */}
       {children}
     </div>
   )
